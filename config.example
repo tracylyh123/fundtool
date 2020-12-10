@@ -1,0 +1,6 @@
+{
+    "db": {
+        "driver": "db_driver",
+        "dns": "db_username:db_password@protocol(host_ip:host_port)/table_name"
+    }
+}
