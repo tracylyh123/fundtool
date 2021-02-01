@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Config is project config read from config.json
 type Config struct {
 	DB struct {
 		Driver string `json:"driver"`
@@ -13,6 +14,7 @@ type Config struct {
 	} `json:"db"`
 }
 
+// Global is project global variable
 var Global struct {
 	Config Config
 }

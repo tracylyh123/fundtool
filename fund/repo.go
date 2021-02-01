@@ -112,16 +112,27 @@ func Find(userID int, code string) (*UserFund, error) {
 }
 
 // LoadTrend loads trend for fund
-func LoadTrend(fund *UserFund, from, to Date) error {
+func LoadTrend(fund *UserFund, from, to string) error {
+	trend, err := FindTrend(fund.code, from, to)
+	if err != nil {
+		return err
+	}
+	fund.trend = trend
+	return nil
+}
+
+// FindTrend finds trend for fund
+func FindTrend(code, from, to string) (Trend, error) {
 	db, err := sql.Open(conf.DB.Driver, conf.DB.DNS)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT `netval`, `netdate` FROM `fundnet` WHERE `code`=? AND `netdate` BETWEEN ? AND ? ORDER BY `netdate` DESC", fund.code, from, to)
+	rows, err := db.Query("SELECT `netval`, `netdate` FROM `fundnet` WHERE `code`=? AND `netdate` BETWEEN ? AND ? ORDER BY `netdate` DESC", code, from, to)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var trend Trend
 	for rows.Next() {
 		var item struct {
 			netval  string
@@ -129,17 +140,17 @@ func LoadTrend(fund *UserFund, from, to Date) error {
 		}
 		err = rows.Scan(&item.netval, &item.netdate)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		v, err := ToPrice(item.netval)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		t, err := ToDate(item.netdate)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		fund.trend = append(fund.trend, Netval{Price: v, Date: t})
+		trend = append(trend, Netval{Price: v, Date: t})
 	}
-	return nil
+	return trend, nil
 }
