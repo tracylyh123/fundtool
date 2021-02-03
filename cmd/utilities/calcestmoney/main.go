@@ -11,9 +11,14 @@ import (
 	"strconv"
 	"sync"
 	"text/tabwriter"
+	"time"
 )
 
 const srctpl = "http://fundgz.1234567.com.cn/js/%s.js"
+
+var cli = &http.Client{
+	Timeout: 10 * time.Second,
+}
 
 type srcitem struct {
 	Code     string `json:"fundcode"`
@@ -41,7 +46,7 @@ type estitem struct {
 
 func (e *estitem) update(wg *sync.WaitGroup) {
 	url := fmt.Sprintf(srctpl, e.code)
-	resp, err := http.Get(url)
+	resp, err := cli.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
